@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round|Open+Sans">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <?!= HtmlService.createHtmlOutputFromFile('initial_screen').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('send_screen').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('modal_style').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('root').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('autocomplete').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('table_add_style').getContent(); ?>
+</head>
+
+<body>
+  <div id="container" class="show">
+    <img id="logo" src="https://imgur.com/XcLPcPu.png"/>
+    <div id="content-initial">
+      <h1 class="title">FORMULÁRIO PARA SOLICITAÇÃO DE SEPARAÇÃO DE MATERIAIS</h1>
+      <div class="box-input">
+        <label class="default-style-label">Insira o seu CPF:</label>
+        <input id="CPF" class="default-style-input" type="text" maxlength="11" placeholder="Somente números..." />
+      </div>
+      <button class="default-style-button" onclick="validationCpfForSearch()">avançar</button>
+    </div>
+    <div style="width:100%;" id="content-send" class="hide">
+      <h2 id="name_user"></h2>
+      <span class="coment">Preencha os campos abaixo para registrar sua solicitação.</span>
+      <div style="width:100%; margin-top:10px;" class="box-for-send">
+        <div class="box-input">
+          <label class="default-style-label">Almoxarifado:</label>
+          <select id="select-warehouse" class="default-style-select">
+             <option selected>Escolha</option>
+             <option value="ITABERABA">ITABERABA</option>
+             <option value="IRECE">IRECE</option>
+          </select>
+        </div>
+        <div class="box-input">
+          <label class="default-style-label">Obra:</label>
+          <input id="constructions" class="default-style-input construcktion" type="text" maxlength="7" placeholder="Somente números..." />
+        </div>
+        <div class="box-input">
+          <label class="default-style-label">Tipo:</label>
+          <select id="select-type" class="default-style-select">
+             <option selected>Escolha</option>
+             <option value="TODO O CONCRETO">TODO O CONCRETO</option>
+             <option value="TODA A FERRAGEM">TODA A FERRAGEM</option>
+             <option value="MATERIAL COMPLETO">MATERIAL COMPLETO</option>
+             <option value="ITEM PARCIAIS">ITEM PARCIAIS</option>
+          </select>
+        </div>
+        <div class="box-input">
+          <label class="default-style-label">Itens adicionais?</label>
+          <select id="select-choice" class="default-style-select">
+             <option selected>Escolha</option>
+             <option value="SIM">SIM</option>
+             <option value="NÃO">NÃO</option>
+          </select>
+        </div>
+        <div id="crud-materials" class="hide">
+          <div class="table-wrapper">
+            <table id="TABELA1" class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Todo o orçado?</th>
+                  <th>Qtde</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="flex-wrap: wrap;" class="not-deletable">
+                  <td style="width: 100%;">
+                    <input  type="text" name="text" style="outline:0; border:none; font-size:15px; width:100%; " class="form-control materiais"></input>
+                  </td>
+                  <td style="width: 100%;">
+                    <input type="checkbox" name="checkbox"  value="false" style="outline:0; border:none; font-size:15px; width:100%;" class="form-control" name="orcado" id="select-materiais-first">
+                  </td>
+                  <td style="width: 100%;">
+                    <input type="number" style="outline:0; border:none; font-size:15px; width:100%;" class="form-control" name="qtde"  min="1"  pattern="\d+"  id="check-materiais-number-first"  style="outline:0; border:none; width:100%;">
+                  </td>
+                  <td>
+                    <a class="add" title="" data-toggle="tooltip"><i class="material-icons">&#xE876;</i></a>
+                    <a class="edit" title="" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>
+                    <a class="delete" title="" data-toggle="tooltip"><i class="material-icons">&#xE872;</i></a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div>
+              <button type="button" style="border-radius: 50%;" id="add-more-camp" class="btn btn-info add-new"><i class="fa fa-plus" style="font-size: 25px;"></i></button>
+            </div>
+          </div>
+        </div>
+        <button class="default-style-button" onclick="sendMaterialsForDestiny()">avançar</button>
+      </div>
+    </div>
+  </div>
+  <div id="modal-input-cpf-null" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">Para prosseguir, por favor, preencha o campo CPF.</p>
+    <button class="default-button-modal-alert" onclick="hiddenModalInputCpfNull()">voltar</button>
+  </div>
+  <div id="modal-input-only-number" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">Somente números são permitidos.</p>
+    <button class="default-button-modal-alert" onclick="hiddenModalInputOnlyNumber()">voltar</button>
+  </div>
+  <div id="modal-input-length-cpf" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">Por favor, informe os 11 dígitos do seu CPF.</p>
+    <button class="default-button-modal-alert" onclick="hiddenModalInputLengthCpf()">voltar</button>
+  </div>
+  <div id="modal-input-cpf-not-contracted" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">O CPF digitado não foi encontrado. Por favor, verifique se o número está correto e
+      tente novamente.</p>
+    <button class="default-button-modal-alert" onclick="hiddenModalInputCpfNotContracted()">voltar</button>
+  </div>
+  <div id="modal-inputs-null" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">Existem campos vazios ou preenchidos incorretamente.<br/>Verifique antes do envio.
+    </p>
+    <button class="default-button-modal-alert" onclick="hiddenModalInputsNull()">voltar</button>
+  </div>
+  <div id="modal-input-constructions" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">O campo obra está inserido incorretamente, informe somente os números da obra.
+    </p>
+    <button class="default-button-modal-alert" onclick="hiddenModalInputsConstructions()">voltar</button>
+  </div>
+  <div id="modal-input-constructions-length" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">Para envio de obra informe mais de 4 dígitos.
+    </p>
+    <button class="default-button-modal-alert" onclick="hiddenModalInputsConstructionsLength()">voltar</button>
+  </div>
+  <div id="modal-construction-inexistent" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert" id="coment_contruction_inexistent">
+    </p>
+    <button class="default-button-modal-alert" onclick="hiddenModalConstructionInexistent()">voltar</button>
+  </div>
+  <div id="modal-register-send-for-repective-sheet" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert" id="coment_construction_send_for_sheet"></p>
+    <button class="default-button-modal-alert" onclick="hiddenModalRegisterSendForRespectiveSheet()">voltar</button>
+  </div>
+  <div id="loading" class="hide">
+    <div>
+      <img class="c-loader" src="https://imgur.com/Zvk9bHc.png" />
+    </div>
+  </div>
+  <div id="modal-alert-crud-input-null" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">Existem campos adicionais que estão vazios, preencha (item + orçado) ou (item +
+      quantidade)</p>
+    <button class="default-button-modal-alert" onclick="hiddenModalAlertCrudInputNuLL()">voltar</button>
+  </div>
+  <div id="modal-alert-crud-input-only-number" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">Existe campos de quantidade adicionais inválidos, corrija-os para envio. </br>
+      Somente números inteiros são permitidos </p>
+    <button class="default-button-modal-alert" onclick="hiddenModalAlertCrudInputOnlyNumber()">voltar</button>
+  </div>
+  <div id="modal-alert-crud-input-only-text-fill" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">Você preencheu o item mas não informou se foi "Todo Orçado" ou a quantidade.</p>
+    <button class="default-button-modal-alert" onclick="hiddenModalAlertCrudInputOnlyTextFill()">voltar</button>
+  </div>
+  <div id="modal-alert-crud-input-only-select-text-null" class="default-div-modal-alert hide">
+    <p class="default-p-modal-alert">Você esqueceu de preencher o item, para envio preenha todos os campos necessários.
+    </p>
+    <button class="default-button-modal-alert" onclick="hiddenModalAlertCrudInputOnlySelectTextNull()">voltar</button>
+  </div>
+</body>
+<script>
+  $(document).ready(function () {
+    getObras();
+    getItems()
+  });
+  
+ function getObras() {
+    google.script.run.withSuccessHandler(function(ar) {
+      statesArray = [];
+      ar.forEach(function(item, index) {
+        statesArray.push(item[0]);
+      });
+      $(".construcktion").autocomplete({
+        source: statesArray,
+        minLength: 2
+      })
+    }).getObras()
+   }
+
+   function getItems() {
+    google.script.run.withSuccessHandler(function(ar) {
+      // console.log(ar)
+      statesArray2 = [];
+      ar.forEach(function(item, index) {
+        statesArray2.push(item[0]);
+      });
+      $(".materiais").autocomplete({
+        source: statesArray2,
+        minLength: 1
+      })
+    }).getItems()
+   }
+ 
+  let modal_loading = document.getElementById("loading")
+  let container = document.getElementById('container')
+  let content_initial = document.getElementById('content-initial')
+  let crud_materials = document.getElementById('crud-materials')
+  let content_send = document.getElementById('content-send')
+
+  let modal_input_cpf_null = document.getElementById('modal-input-cpf-null')
+  let modal_input_only_number = document.getElementById('modal-input-only-number')
+  let modal_input_length_cpf = document.getElementById('modal-input-length-cpf')
+  let modal_input_cpf_not_contracted = document.getElementById('modal-input-cpf-not-contracted')
+  let modal_inputs_null = document.getElementById("modal-inputs-null")
+  let modal_input_constructions = document.getElementById("modal-input-constructions")
+  let modal_input_constructions_length = document.getElementById("modal-input-constructions-length")
+  let modal_construction_inexistent = document.getElementById("modal-construction-inexistent")
+  let modal_register_send_for_repective_sheet = document.getElementById('modal-register-send-for-repective-sheet')
+  let modal_alert_crud_input_null = document.getElementById('modal-alert-crud-input-null')
+  let modal_alert_crud_input_only_number = document.getElementById('modal-alert-crud-input-only-number')
+  let modal_alert_crud_input_only_text_fill = document.getElementById('modal-alert-crud-input-only-text-fill')
+  let modal_alert_crud_input_only_select_text_null = document.getElementById('modal-alert-crud-input-only-select-text-null')
+
+function hiddenModalAlertCrudInputOnlySelectTextNull(){
+   hideModal(modal_alert_crud_input_only_select_text_null)
+    showModal(container)
+}
+
+  function hiddenModalAlertCrudInputOnlyTextFill(){
+    hideModal(modal_alert_crud_input_only_text_fill)
+    showModal(container)
+  }
+
+  let select_materiais_first = document.getElementById('select-materiais-first')
+  let check_materiais_number_first = document.getElementById('check-materiais-number-first')
+
+   select_materiais_first.addEventListener('change', () => {
+    if (select_materiais_first.checked) {
+      check_materiais_number_first.disabled = true;
+      check_materiais_number_first.value  = ''
+    }else{
+      check_materiais_number_first.disabled = false;
+    }
+  });
+
+  let user = document.getElementById('name_user')
+  let select_warehouse = document.getElementById('select-warehouse')
+  let contruction_x = document.getElementById('constructions')
+  let select_choice = document.getElementById('select-choice')
+  let select_type = document.getElementById('select-type')
+
+  select_choice.addEventListener('change', () => {
+    if (select_choice.value == "SIM") {
+       showModal(crud_materials)
+    }else{
+       hideModal(crud_materials)
+    }
+  });
+
+ select_type.addEventListener('change', () => {
+    if (select_type.value == "ITEM PARCIAIS") {
+      select_choice.value = "SIM";
+      select_choice.disabled = true;
+      showModal(crud_materials)
+    }else{
+      select_choice.value = "Escolha";
+      select_choice.disabled = false;
+      hideModal(crud_materials)
+    }
+  });
+
+ 
+  select_choice.addEventListener('change', () => {
+    if(select_choice.value == "SIM"){
+       showModal(crud_materials)
+    }else if(select_choice.value == "Escolha"){
+      hideModal(crud_materials)
+    }else if(select_choice.value == "NÃO"){
+      hideModal(crud_materials)
+    }
+  });
+
+  function validationCpfForSearch(){
+    const regex = /[.,:\/]/
+    const letraNull = /^\d+$/
+    let CPF = document.getElementById('CPF').value
+
+    if(CPF == ""){
+      showModal(modal_input_cpf_null)
+      hideModal(container)
+    }else if(!letraNull.test(CPF) || regex.test(CPF)){
+      showModal(modal_input_only_number)
+      hideModal(container)
+    }else if(CPF.length != 11){
+      showModal(modal_input_length_cpf)
+      hideModal(container)
+    }else{
+       showModal(modal_loading)
+       hideModal(container)
+       google.script.run.withSuccessHandler(function(response){
+         hideModal(modal_loading)
+         if(response != "CPF NAO FOI ENCONTRADO" ){
+          showModal(container)
+          hideModal(content_initial)
+          showModal(content_send)
+          user.innerHTML = `Olá, ${response[0]}!` 
+         }else{
+          showModal(modal_input_cpf_not_contracted)   
+         }
+       }).searchCpfInDataBase(CPF)
+    }
+  }
+  
+  
+   function sendMaterialsForDestiny(){
+     let almox = select_warehouse.value
+     let type = select_type.value
+     let alternative = select_choice.value
+     let obra = contruction_x.value
+
+     const regex = /[.,:\/]/;
+     const letraNull = /^\d+$/;
+
+     let arrCrudInputNull = []
+     let arrCrudInputTextOnlyFill = []
+     let arrOnlyInputNumberSelect = []
+     let arrOnlyInputNumber = []
+     let dataBaseForSheet = []
+
+     const itemsNull = []
+      
+     let inputs = [select_warehouse, select_type, select_choice, contruction_x]
+      
+     inputs.forEach(item =>{
+       if(item.value == "" || item.value == "Escolha"){
+         itemsNull.push(item)
+       }
+     })
+
+      if(itemsNull.length > 0){
+        showModal(modal_inputs_null)
+        hideModal(container)
+        itemsNull.forEach(function(elemento) {
+           elemento.style.border = "1px solid red";
+           elemento.addEventListener('input', function() {
+           elemento.style.border = "";
+         });
+        })
+      }else if (!letraNull.test(obra) || regex.test(obra)) {
+            showModal(modal_input_constructions)
+            hideModal(container)
+            contruction_x.style.border = "1px solid red";
+            contruction_x.addEventListener('input', function(){
+            contruction_x.style.border = "";
+         })
+      }else if(obra.length < 5){
+          showModal(modal_input_constructions_length)
+          hideModal(container)
+          contruction_x.style.border = "1px solid red";
+          contruction_x.addEventListener('input', function(){
+          contruction_x.style.border = "";
+          })
+      }else{
+         showModal(modal_loading)
+         hideModal(container)
+         google.script.run.withSuccessHandler(function(response){
+           hideModal(modal_loading)
+           if(response == "Não existe essa obra"){
+              showModal(modal_construction_inexistent)
+              coment_contruction_inexistent.innerHTML =  `Esta obra B-${obra} não foi encontrada na nossa base de dados. ` 
+              hideModal(container)
+           }else{
+            console.log(select_choice)
+            if(alternative == "SIM"){
+                 var tableData = [];
+     $('#TABELA1 tbody tr').each(function(row, tr) {
+     var rowData = {
+        'item': $(tr).find("td:eq(0)").has('input').length ? $(tr).find("td:eq(0) input").val() : $(tr).find("td:eq(0)").text(),
+        'orcado': $(tr).find("td:eq(1)").has('input').length ? $(tr).find("td:eq(1) input").val() : $(tr).find("td:eq(1)").text(),
+        'qtde': $(tr).find("td:eq(2)").has('input').length ? $(tr).find("td:eq(2) input").val() : $(tr).find("td:eq(2)").text(),
+        };
+       tableData.push(rowData);
+     });
+      
+     var arrItemsCrud = []
+     tableData.forEach(item => {
+      arrItemsCrud.push([item.item,item.orcado, item.qtde])
+     })
+
+     arrItemsCrud.forEach((item,index)=>{
+        if(item[0] == "" && item[1] == 'false' && item[2] == ""){
+          arrCrudInputNull.push(item)
+        }else if(item[0] == "" && item[1] == 'true'){
+          arrOnlyInputNumberSelect.push(item)
+        }else if(item[0] != "" && item[1] == 'false' && item[2] == ""){
+          arrCrudInputTextOnlyFill.push(item)
+        }else if((!letraNull.test(item[2]) || regex.test(item[2])) && (item[2] !== "")){
+           arrOnlyInputNumber.push(item)
+        }else {
+           dataBaseForSheet.push(item)
+        }
+     })
+
+     if(arrCrudInputNull.length > 0){
+       showModal(modal_alert_crud_input_null)
+       hideModal(container)
+     }else if(arrOnlyInputNumberSelect.length > 0){
+       showModal(modal_alert_crud_input_only_select_text_null)
+       hideModal(container)
+     }else if(arrCrudInputTextOnlyFill.length > 0){
+       showModal(modal_alert_crud_input_only_text_fill)
+       hideModal(container)
+     }else if(arrOnlyInputNumber.length > 0){
+        showModal( modal_alert_crud_input_only_number)
+              hideModal(container)
+     }
+            }else{
+              alert("Escolheu não man ? ")
+            }
+              // showModal(modal_loading)
+              // hideModal(container)
+              // google.script.run.withSuccessHandler(function(response){
+              //    hideModal(modal_loading)
+              //    if(response == "Materiais enviados com sucesso para sua respectiva base."){
+              //     showModal(modal_register_send_for_repective_sheet)
+              //     coment_construction_send_for_sheet.innerHTML = `Os materiais foram enviados com sucesso para a planila 05 - ${almox} `
+              //     hideModal(container)
+              //     clearInputsAfterSendMaterialsForDestinySheet()
+              //    }
+              // }).sendMaterialsForDestinySheet(almox,type,alternative, obra)
+           }
+         }).searchConstructionIncludsInDataBase(obra)
+      }
+   }
+
+  
+ 
+   function showModal(modal) {
+     modal.classList.remove('hide');
+     modal.classList.add('show');
+   }
+
+   function hideModal(modal) {
+     modal.classList.remove('show');
+     modal.classList.add('hide');
+   }
+   function hiddenModalAlertCrudInputNuLL(){
+     hideModal(modal_alert_crud_input_null)
+     showModal(container)
+   }
+   function hiddenModalAlertCrudInputOnlyNumber(){
+     hideModal(modal_alert_crud_input_only_number)
+     showModal(container)
+   } 
+   function  hiddenModalRegisterSendForRespectiveSheet(){
+    hideModal(modal_register_send_for_repective_sheet)
+    showModal(container)
+   }
+   function hiddenModalConstructionInexistent(){
+    hideModal(modal_construction_inexistent)
+    showModal(container)
+   }
+
+   function hiddenModalInputsConstructionsLength(){
+    hideModal(modal_input_constructions_length)
+    showModal(container)
+   }
+  
+   function hiddenModalInputsConstructions(){
+    hideModal(modal_input_constructions)
+    showModal(container)
+   }
+ 
+  function hiddenModalInputsNull(){
+     hideModal(modal_inputs_null)
+     showModal(container)
+  }
+  function hiddenModalInputCpfNull(){
+     hideModal(modal_input_cpf_null)
+     showModal(container)
+  }
+  function hiddenModalInputOnlyNumber(){
+     hideModal(modal_input_only_number)
+     showModal(container)
+  }
+  function hiddenModalInputLengthCpf(){
+     hideModal(modal_input_length_cpf)
+     showModal(container)
+  }
+  function hiddenModalInputCpfNotContracted(){
+     hideModal(modal_input_cpf_not_contracted)
+     showModal(container)
+  }
+
+  function clearInputsAfterSendMaterialsForDestinySheet(){
+    select_warehouse.value = "Escolha"
+    contruction_x.value = ""
+    select_type.value = "Escolha"
+    select_choice.value = "Escolha"
+    select_choice.disabled = false
+  }
+
+  $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+    var actions = $("table td:last-child").html();
+
+    $(document).on("change", "input[name='checkbox']", function() { 
+    
+    var isChecked = this.checked; // Check if the checkbox is checked
+
+    if (isChecked) {
+        $(this).closest("tr").find("input[name='qtde']").prop("disabled", true);
+        $(this).closest("tr").find("input[name='qtde']").val("");
+    } else {
+        $(this).closest("tr").find("input[name='qtde']").prop("disabled", false);
+    }
+
+    // Update the value of the checkbox to true or false
+    $(this).val(isChecked);
+});
+
+    // $(document).on("change", "input[name='checkbox']", function() { 
+    //     if ($(this).is(":checked")) {
+    //         $(this).closest("tr").find("input[name='qtde']").prop("disabled", true);
+    //         $(this).closest("tr").find("input[name='qtde']").val("");
+    //     } else {
+    //         $(this).closest("tr").find("input[name='qtde']").prop("disabled", false);
+    //     }
+
+    //      $(this).val(isChecked);
+    // });
+
+    // Append table with add row form on add new button click
+    $(".add-new").click(function(){
+      $(this).attr("disabled", "disabled");
+      var index = $("table tbody tr:last-child").index();
+      var row = '<tr style:flex-wrap:wrap;>' +
+                '<td style="padding:8px;"><input type="text" name="text" style="outline:0; border:none; font-size:15px; width:100%; " class="form-control materiais" /></td>' +
+                '<td style="padding:8px;"><input type="checkbox" value="false" name="checkbox" style="outline:0; border:none; font-size:15px; width:100%;" class="form-control" name="orcado" id="orcado"/></td>' +'<td style="padding:8px;"><input type="number" style="outline:0; border:none; font-size:15px; width:100%;" class="form-control" name="qtde" id="qtde"  min="1"  pattern="\d+"/></td>' +
+                '<td>' + actions + '</td>' +
+                '</tr>';
+      $("table").append(row);
+
+      // Inicializa o autocomplete para o novo input adicionado
+      $("table tbody tr").eq(index + 1).find(".materiais").autocomplete({
+        source: statesArray2,
+        minLength: 0
+      });
+
+      $("table tbody tr").eq(index + 1).find(".add, .edit").toggle();
+      $('[data-toggle="tooltip"]').tooltip();
+   });
+	// Add row on add button click
+
+	$(document).on("click", ".add", function(){
+		var empty = false;
+		var input = $(this).parents("tr").find('input[type="text"]');
+        input.each(function(){
+			if(!$(this).val()){
+				$(this).addClass("error");
+				empty = true;
+			} else{
+                $(this).removeClass("error");
+            }
+		});
+		$(this).parents("tr").find(".error").first().focus();
+		if(!empty){
+			input.each(function(){
+				$(this).parent("td").html($(this).val());
+			});			
+			$(this).parents("tr").find(".add, .edit").toggle();
+			$(".add-new").removeAttr("disabled");
+		}		
+    });
+
+  $(document).on("click", ".edit", function() {
+  $(this).parents("tr").find("td:not(:last-child)").each(function() {
+    var inputs = $(this).find("input");
+    var content = "";
+
+    if (inputs.length > 0) {
+      var inputType = inputs.attr("type");
+      var inputName = inputs.attr("name");
+      var inputClass = inputs.attr("class");
+      content = inputs.val();
+    } else {
+      var inputType = "text";
+      var inputName = "text"
+      var inputClass = "form-control materiais"
+      content = $(this).text();
+    }
+
+    $(this).html('<input type="' + inputType + '" name="' + inputName + '" class="'+ inputClass + '" value="'+ content +'">');
+  });
+
+  $(this).parents("tr").find(".add, .edit").toggle();
+  $(".add-new").attr("disabled", "disabled");
+
+  $(this).parents("tr").find(".materiais").autocomplete({
+    source: statesArray2,
+    minLength: 0
+  });
+});
+
+  $(document).on("click", ".delete", function(){
+  if(!$(this).parents("tr").hasClass("not-deletable")) {
+    $(this).parents("tr").remove();
+    $(".add-new").removeAttr("disabled");
+  }
+  });
+});
+
+</script>
+
+</html>
